@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Freedom Number Calculator Kit | Freedom Life 3.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg-deep: #0a0f1a;
@@ -563,31 +564,7 @@
     text-decoration: underline;
   }
 
-  /* --- PRINT --- */
-  @media print {
-    body { background: #fff; color: #000; }
-    .hero { background: none; padding: 1.5rem 1rem 1rem; }
-    .nav-tabs, .welcome-back, .btn-outline, .btn-primary, .footer, .cta-box, #saveCard { display: none !important; }
-    /* Show all sections that have results */
-    .section { display: block !important; page-break-before: auto; }
-    .result-panel.visible { display: block !important; }
-    /* Hide the "no data" placeholders and input form on print */
-    #gapNoData, #chartNoData { display: none !important; }
-    .card:has(> .card-title:first-child) { page-break-inside: avoid; }
-    .guide-phase { page-break-inside: avoid; }
-    .gap-scenario { page-break-inside: avoid; }
-    .section-header { page-break-after: avoid; }
-    /* Clean styles for paper */
-    .card, .guide-phase, .gap-scenario { border-color: #ccc; background: #f9f9f9; }
-    .freedom-number-display { background: #f0f0f0; border-color: #ccc; }
-    .freedom-number-display .number { color: #000; -webkit-text-fill-color: #000; }
-    .stat-box { background: #f5f5f5; border-color: #ccc; }
-    .hero h1 { background: none; -webkit-text-fill-color: #000; color: #000; }
-    .hero-badge { background: #eee; color: #333; border-color: #ccc; }
-    .guide-phase .phase-tag { border: 1px solid #999; }
-    .gap-bar-track { background: #ddd; }
-    * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  }
+  /* Print styles removed - using jsPDF for PDF generation */
 </style>
 </head>
 <body>
@@ -716,12 +693,12 @@
     <div class="card" id="saveCard" style="display:none; text-align: center; border-color: rgba(245,158,11,0.2); background: linear-gradient(135deg, rgba(245,158,11,0.04), transparent);">
       <div class="card-title">Save Your Results</div>
       <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; margin-bottom: 1.25rem;">
-        This is your number. You'll want to come back to it. Print a copy so you have a permanent record of your Freedom Number, your gap, and all three scenarios. Tape it to your wall, put it in your desk drawer, keep it where you'll see it. This is the number that changes everything.
+        This is your number. You'll want to come back to it. Download your complete results as a PDF. All four sections, your exact numbers, the gap analysis, every scenario. Tape it to your wall, put it in your desk drawer, keep it where you'll see it. This is the number that changes everything.
       </p>
       <div class="save-bar visible" id="saveBar">
-        <button class="btn-save" onclick="printResults()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print / Save as PDF
+        <button class="btn-save" onclick="generatePDF()" style="background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; padding: 0.75rem 1.5rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download My Results as PDF
         </button>
         <button class="btn-save" onclick="copyResultsLink()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
@@ -1041,9 +1018,482 @@
     document.getElementById('chartResults').style.display = 'none';
   };
 
-  // --- PRINT / PDF ---
-  window.printResults = function() {
-    window.print();
+  // --- GENERATE PDF ---
+  window.generatePDF = function() {
+    if (!calcData) { alert('Please calculate your Freedom Number first.'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'pt', 'letter'); // 612 x 792
+    const d = calcData;
+    const W = 612, M = 50; // page width, margin
+    const CW = W - M * 2; // content width
+
+    // --- COLORS ---
+    const DARK = [15, 23, 42];
+    const AMBER = [245, 158, 11];
+    const GREEN = [34, 197, 94];
+    const RED = [239, 68, 68];
+    const BLUE = [59, 130, 246];
+    const WHITE = [255, 255, 255];
+    const GRAY = [148, 163, 184];
+    const DIMGRAY = [100, 116, 139];
+
+    // --- HELPERS ---
+    function bg() { doc.setFillColor(...DARK); doc.rect(0, 0, W, 792, 'F'); }
+    function heading(text, y, size) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(size || 22);
+      doc.setTextColor(...WHITE);
+      doc.text(text, W / 2, y, { align: 'center' });
+    }
+    function subtext(text, y, maxW) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(...GRAY);
+      const lines = doc.splitTextToSize(text, maxW || CW);
+      doc.text(lines, W / 2, y, { align: 'center' });
+      return lines.length;
+    }
+    function label(text, x, y) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...GRAY);
+      doc.text(text.toUpperCase(), x, y);
+    }
+    function drawStatBox(x, y, w, h, labelText, value, color) {
+      doc.setFillColor(30, 41, 59);
+      doc.roundedRect(x, y, w, h, 6, 6, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(...GRAY);
+      doc.text(labelText.toUpperCase(), x + w/2, y + 18, { align: 'center' });
+      doc.setFontSize(16);
+      doc.setTextColor(...color);
+      doc.text(value, x + w/2, y + 40, { align: 'center' });
+    }
+    function wrapText(text, x, y, maxW, lineH) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(...GRAY);
+      const lines = doc.splitTextToSize(text, maxW || CW);
+      doc.text(lines, x, y);
+      return y + lines.length * (lineH || 13);
+    }
+    function pageFooter() {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(...DIMGRAY);
+      doc.text('Freedom Life 3.0  |  For educational purposes only. Not financial advice.  |  freedomlife3.com', W / 2, 775, { align: 'center' });
+    }
+
+    // ==========================================
+    // PAGE 1: FREEDOM NUMBER SUMMARY
+    // ==========================================
+    bg();
+
+    // Header
+    doc.setFillColor(245, 158, 11, 0.15);
+    doc.roundedRect(W/2 - 65, 35, 130, 22, 11, 11, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...AMBER);
+    doc.text('FREEDOM LIFE 3.0', W / 2, 50, { align: 'center' });
+
+    heading('Freedom Number Calculator Kit', 85, 24);
+    subtext('Your personalized retirement analysis', 105);
+
+    // Divider
+    doc.setDrawColor(...AMBER);
+    doc.setLineWidth(1);
+    doc.line(M + 80, 120, W - M - 80, 120);
+
+    // Freedom Number display
+    doc.setFillColor(25, 35, 55);
+    doc.roundedRect(M, 138, CW, 100, 8, 8, 'F');
+    doc.setDrawColor(245, 158, 11, 0.3);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(M, 138, CW, 100, 8, 8, 'S');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...AMBER);
+    doc.text('YOUR FREEDOM NUMBER', W / 2, 165, { align: 'center' });
+
+    doc.setFontSize(42);
+    doc.setTextColor(...WHITE);
+    doc.text(fmt(d.freedomNum), W / 2, 205, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...GRAY);
+    doc.text('Total nest egg needed to fund your retirement', W / 2, 228, { align: 'center' });
+
+    // Stat boxes
+    const bw = (CW - 30) / 4;
+    const by = 258;
+    drawStatBox(M, by, bw, 55, 'Years to Retire', String(d.yearsToRetire), AMBER);
+    drawStatBox(M + bw + 10, by, bw, 55, 'Years in Retirement', String(d.yearsInRetire), BLUE);
+    drawStatBox(M + (bw + 10) * 2, by, bw, 55, 'Annual Need (After SS)', fmt(d.annualGap), GREEN);
+    drawStatBox(M + (bw + 10) * 3, by, bw, 55, 'Your Current Gap', fmt(d.gap), RED);
+
+    // Your Information summary
+    let yPos = 340;
+    doc.setFillColor(30, 41, 59);
+    doc.roundedRect(M, yPos, CW, 110, 6, 6, 'F');
+    label('Your Information', M + 15, yPos + 20);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...GRAY);
+    const infoLines = [
+      ['Current Age:', String(d.age), 'Retirement Age:', String(d.retAge)],
+      ['Life Expectancy:', String(d.lifeExp), 'Desired Income:', fmt(d.income) + '/year'],
+      ['Current Savings:', fmt(d.savings), 'Monthly Contribution:', fmt(d.monthly) + '/month'],
+      ['Social Security:', fmt(d.ss) + '/year', '', '']
+    ];
+    infoLines.forEach((row, i) => {
+      const ly = yPos + 38 + i * 18;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...GRAY);
+      doc.text(row[0], M + 15, ly);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(...WHITE);
+      doc.text(row[1], M + 120, ly);
+      if (row[2]) {
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(...GRAY);
+        doc.text(row[2], M + 270, ly);
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(...WHITE);
+        doc.text(row[3], M + 400, ly);
+      }
+    });
+
+    // Narrative
+    yPos = 470;
+    doc.setFillColor(30, 41, 59);
+    doc.roundedRect(M, yPos, CW, 155, 6, 6, 'F');
+    label('What This Means', M + 15, yPos + 20);
+    const narr = `You're ${d.age} years old. You want to retire at ${d.retAge}, which gives you ${d.yearsToRetire} years to build your nest egg. ` +
+      `With Social Security covering ${fmt(d.ss)}/year, you need your investments to generate ${fmt(d.annualGap)}/year. ` +
+      `Using a 4% withdrawal rate, that means you need ${fmt(d.freedomNum)} saved by retirement. ` +
+      `Right now you have ${fmt(d.savings)}. At a traditional 7% return with ${fmt(d.monthly)}/month contributions, ` +
+      `you'll have roughly ${fmt(d.projectedAt7)} by age ${d.retAge}. ` +
+      (d.gap > 0
+        ? `That leaves a gap of ${fmt(d.gap)}. The old plan doesn't get you there. But a different rate of return might.`
+        : `You're actually on track. But the comparison chart will show you how much faster you could get there.`);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...GRAY);
+    const narrLines = doc.splitTextToSize(narr, CW - 30);
+    doc.text(narrLines, M + 15, yPos + 38);
+
+    pageFooter();
+
+    // ==========================================
+    // PAGE 2: GAP CALCULATOR
+    // ==========================================
+    doc.addPage();
+    bg();
+
+    heading('The Gap Calculator', 55, 22);
+    subtext('Three scenarios. One reality check.', 75);
+
+    // Gap display
+    doc.setFillColor(25, 35, 55);
+    doc.roundedRect(M, 95, CW, 75, 8, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...AMBER);
+    doc.text('YOUR GAP', W / 2, 118, { align: 'center' });
+    doc.setFontSize(34);
+    doc.setTextColor(...WHITE);
+    doc.text(fmt(d.gap), W / 2, 150, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...GRAY);
+    doc.text(`Between where you are and ${fmt(d.freedomNum)} by age ${d.retAge}`, W / 2, 165, { align: 'center' });
+
+    // Scenarios
+    const scenarios = [
+      { rate: 0.07, label: 'Traditional (Index Funds, Bonds)', color: RED, barColor: [239, 68, 68] },
+      { rate: 0.15, label: 'Moderate Alternative Strategy', color: AMBER, barColor: [245, 158, 11] },
+      { rate: 0.20, label: 'Aggressive Alternative Strategy', color: GREEN, barColor: [34, 197, 94] }
+    ];
+
+    let sy = 195;
+    scenarios.forEach(s => {
+      const projected = futureValue(d.savings, d.monthly, s.rate, d.yearsToRetire);
+      const pct = Math.min(100, (projected / d.freedomNum) * 100);
+      const shortfall = d.freedomNum - projected;
+      const hits = projected >= d.freedomNum;
+
+      doc.setFillColor(30, 41, 59);
+      doc.roundedRect(M, sy, CW, 85, 6, 6, 'F');
+
+      // Rate header
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...WHITE);
+      doc.text(`${(s.rate * 100).toFixed(0)}% Annual Return`, M + 15, sy + 22);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...DIMGRAY);
+      doc.text(s.label, M + 15, sy + 36);
+
+      // Outcome
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...(hits ? GREEN : s.color));
+      const outcomeText = hits ? 'Goal Reached' : fmt(Math.abs(shortfall)) + ' short';
+      doc.text(outcomeText, W - M - 15, sy + 22, { align: 'right' });
+
+      // Progress bar
+      doc.setFillColor(50, 60, 80);
+      doc.roundedRect(M + 15, sy + 48, CW - 30, 8, 4, 4, 'F');
+      doc.setFillColor(...s.barColor);
+      const barW = Math.max(8, (CW - 30) * pct / 100);
+      doc.roundedRect(M + 15, sy + 48, barW, 8, 4, 4, 'F');
+
+      // Detail
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...GRAY);
+      doc.text(`Projected at age ${d.retAge}: ${fmt(projected)}  |  ${pct.toFixed(0)}% of Freedom Number`, M + 15, sy + 73);
+
+      sy += 100;
+    });
+
+    // Gap narrative
+    sy += 10;
+    doc.setFillColor(30, 41, 59);
+    doc.roundedRect(M, sy, CW, 130, 6, 6, 'F');
+    label('The Math is Clear', M + 15, sy + 20);
+    const gapNarr = `At 7%, your current savings plus ${fmt(d.monthly)}/month in contributions grows to roughly ${fmt(futureValue(d.savings, d.monthly, 0.07, d.yearsToRetire))} in ${d.yearsToRetire} years. ` +
+      `At 15%, that same money becomes ${fmt(futureValue(d.savings, d.monthly, 0.15, d.yearsToRetire))}. ` +
+      `At 20%, it reaches ${fmt(futureValue(d.savings, d.monthly, 0.20, d.yearsToRetire))}. ` +
+      `Same starting point. Same contributions. Completely different outcomes. ` +
+      `The variable that matters most isn't how much you save. It's the rate of return on what you already have.`;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...GRAY);
+    const gapLines = doc.splitTextToSize(gapNarr, CW - 30);
+    doc.text(gapLines, M + 15, sy + 38);
+
+    pageFooter();
+
+    // ==========================================
+    // PAGE 3: RATE OF RETURN COMPARISON
+    // ==========================================
+    doc.addPage();
+    bg();
+
+    heading('Rate of Return Comparison', 55, 22);
+    subtext(`What your ${fmt(d.savings)} becomes at different rates over 5, 10, and 15 years`, 75);
+
+    // Table
+    const rates = [
+      { rate: 0.03, label: '3%', cat: 'Savings Account' },
+      { rate: 0.05, label: '5%', cat: 'CDs / Treasury' },
+      { rate: 0.07, label: '7%', cat: 'Index Funds (Avg)' },
+      { rate: 0.10, label: '10%', cat: 'Active Management' },
+      { rate: 0.15, label: '15%', cat: 'Alternative Strategies' },
+      { rate: 0.20, label: '20%', cat: 'High-Performance' },
+    ];
+
+    let ty = 100;
+    // Table header
+    doc.setFillColor(30, 41, 59);
+    doc.rect(M, ty, CW, 24, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...DIMGRAY);
+    const cols = [M + 15, M + 75, M + 185, M + 295, M + 395];
+    ['RETURN RATE', '5 YEARS', '10 YEARS', '15 YEARS', 'CATEGORY'].forEach((h, i) => {
+      doc.text(h, cols[i], ty + 16);
+    });
+
+    ty += 24;
+    rates.forEach((r, idx) => {
+      const v5 = futureValue(d.savings, d.monthly, r.rate, 5);
+      const v10 = futureValue(d.savings, d.monthly, r.rate, 10);
+      const v15 = futureValue(d.savings, d.monthly, r.rate, 15);
+
+      if (idx % 2 === 0) {
+        doc.setFillColor(20, 30, 48);
+        doc.rect(M, ty, CW, 28, 'F');
+      }
+
+      const isHighlight = r.rate >= 0.15;
+      doc.setFont('helvetica', isHighlight ? 'bold' : 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(...(isHighlight ? GREEN : WHITE));
+      doc.text(r.label, cols[0], ty + 18);
+      doc.text(fmt(v5), cols[1], ty + 18);
+      doc.text(fmt(v10), cols[2], ty + 18);
+      doc.text(fmt(v15), cols[3], ty + 18);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...DIMGRAY);
+      doc.text(r.cat, cols[4], ty + 18);
+
+      ty += 28;
+    });
+
+    // Difference row
+    const at7_5 = futureValue(d.savings, d.monthly, 0.07, 5);
+    const at20_5 = futureValue(d.savings, d.monthly, 0.20, 5);
+    const at7_10 = futureValue(d.savings, d.monthly, 0.07, 10);
+    const at20_10 = futureValue(d.savings, d.monthly, 0.20, 10);
+    const at7_15 = futureValue(d.savings, d.monthly, 0.07, 15);
+    const at20_15 = futureValue(d.savings, d.monthly, 0.20, 15);
+
+    doc.setDrawColor(...AMBER);
+    doc.setLineWidth(1.5);
+    doc.line(M, ty, M + CW, ty);
+    doc.setFillColor(40, 35, 20);
+    doc.rect(M, ty, CW, 28, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...AMBER);
+    doc.text('20% vs 7%', cols[0], ty + 18);
+    doc.text('+' + fmt(at20_5 - at7_5), cols[1], ty + 18);
+    doc.text('+' + fmt(at20_10 - at7_10), cols[2], ty + 18);
+    doc.text('+' + fmt(at20_15 - at7_15), cols[3], ty + 18);
+
+    ty += 50;
+
+    // Difference stats
+    const statW = (CW - 20) / 3;
+    [
+      ['5-Year Difference', '+' + fmt(at20_5 - at7_5), ((at20_5/at7_5 - 1)*100).toFixed(0) + '% more'],
+      ['10-Year Difference', '+' + fmt(at20_10 - at7_10), ((at20_10/at7_10 - 1)*100).toFixed(0) + '% more'],
+      ['15-Year Difference', '+' + fmt(at20_15 - at7_15), ((at20_15/at7_15 - 1)*100).toFixed(0) + '% more']
+    ].forEach((stat, i) => {
+      const sx = M + i * (statW + 10);
+      doc.setFillColor(30, 41, 59);
+      doc.roundedRect(sx, ty, statW, 65, 6, 6, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(...DIMGRAY);
+      doc.text(stat[0].toUpperCase(), sx + statW/2, ty + 18, { align: 'center' });
+      doc.setFontSize(16);
+      doc.setTextColor(...AMBER);
+      doc.text(stat[1], sx + statW/2, ty + 40, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...DIMGRAY);
+      doc.text(stat[2], sx + statW/2, ty + 55, { align: 'center' });
+    });
+
+    ty += 85;
+
+    // Chart narrative
+    doc.setFillColor(30, 41, 59);
+    doc.roundedRect(M, ty, CW, 100, 6, 6, 'F');
+    const chartNarr = `Starting with ${fmt(d.savings)} and adding ${fmt(d.monthly)}/month, the difference between a traditional 7% return and a 20% return over 10 years is ${fmt(at20_10 - at7_10)}. That's not a rounding error. That's the difference between "comfortable" and "stuck." Over 15 years, that gap widens to ${fmt(at20_15 - at7_15)}. The rate of return isn't a detail. It's the entire game.`;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...GRAY);
+    const cLines = doc.splitTextToSize(chartNarr, CW - 30);
+    doc.text(cLines, M + 15, ty + 20);
+
+    pageFooter();
+
+    // ==========================================
+    // PAGE 4: "OH MY GOD" MOMENT GUIDE
+    // ==========================================
+    doc.addPage();
+    bg();
+
+    heading('The "Oh My God" Moment Guide', 55, 22);
+    subtext('You just saw your number. Here\'s what happens next.', 75);
+
+    const phases = [
+      {
+        tag: 'PHASE 1', color: RED, title: 'Grief: "I\'m so far behind."',
+        body: 'This is the gut punch. You look at the gap between where you are and where you need to be, and it feels impossible. Your stomach drops. You might feel sick. That\'s normal. What you\'re grieving is the years you thought were working for you, but weren\'t.',
+        items: ['Let yourself feel it. Don\'t rationalize it away.', 'Write down what you\'re feeling. One page, uncensored.', 'Remind yourself: the number is the number. It\'s not a judgment on you.', 'This feeling is temporary. It\'s not your permanent address.'],
+        action: 'Set a timer for 15 minutes. Let yourself feel all of it. When the timer goes off, turn the page.'
+      },
+      {
+        tag: 'PHASE 2', color: AMBER, title: 'Anger: "Why didn\'t anyone tell me this?"',
+        body: 'Once the grief fades, the anger shows up. Why didn\'t your financial advisor run these numbers ten years ago? Why did every retirement article just say "max out your 401(k)" like that was an answer?',
+        items: ['The anger is valid. Channel it. Don\'t let it freeze you.', 'You were given a playbook by people who profit whether you win or lose.', 'The same system that created the gap won\'t close the gap.', 'Being angry at the past doesn\'t change the past. Acting on the future does.'],
+        action: 'Write: "The old plan got me to ' + fmt(d.savings) + '. I need a new plan to get me to ' + fmt(d.freedomNum) + '." Tape it where you\'ll see it.'
+      },
+      {
+        tag: 'PHASE 3', color: GREEN, title: 'Clarity: "So what actually works?"',
+        body: 'This is where it gets good. Once you know the number, and once you\'ve processed the emotion, you can finally think clearly about the math. The only variable that changes your outcome dramatically is rate of return.',
+        items: ['At 7%, you\'re probably stuck. That\'s the path you\'ve been on.', 'At 15 to 20%, the gap starts closing in a way that feels possible.', 'The question isn\'t "can I save more?" It\'s "can I earn more on what I have?"'],
+        action: 'Look at your Rate of Return Comparison on Page 3. The difference between 7% and 20% over 10 years is ' + fmt(at20_10 - at7_10) + '. That\'s your map.'
+      }
+    ];
+
+    let py = 100;
+    phases.forEach(ph => {
+      // Phase card
+      doc.setFillColor(30, 41, 59);
+      doc.roundedRect(M, py, CW, 175, 6, 6, 'F');
+      // Left border accent
+      doc.setFillColor(...ph.color);
+      doc.rect(M, py, 3, 175, 'F');
+
+      // Phase tag
+      doc.setFillColor(ph.color[0], ph.color[1], ph.color[2], 0.15);
+      doc.roundedRect(M + 15, py + 12, 52, 16, 3, 3, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(...ph.color);
+      doc.text(ph.tag, M + 41, py + 23, { align: 'center' });
+
+      // Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(...WHITE);
+      doc.text(ph.title, M + 15, py + 46);
+
+      // Body
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      const bodyLines = doc.splitTextToSize(ph.body, CW - 30);
+      doc.text(bodyLines, M + 15, py + 62);
+
+      // Bullet items
+      let iy = py + 62 + bodyLines.length * 12 + 5;
+      ph.items.forEach(item => {
+        doc.setFillColor(...ph.color);
+        doc.circle(M + 20, iy - 2.5, 2.5, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GRAY);
+        doc.text(item, M + 30, iy);
+        iy += 13;
+      });
+
+      // Action box
+      doc.setFillColor(20, 30, 48);
+      doc.roundedRect(M + 15, py + 140, CW - 30, 28, 4, 4, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(...AMBER);
+      doc.text('YOUR MOVE:', M + 25, py + 153);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...WHITE);
+      const actionLines = doc.splitTextToSize(ph.action, CW - 85);
+      doc.text(actionLines, M + 80, py + 153);
+
+      py += 190;
+    });
+
+    pageFooter();
+
+    // --- SAVE ---
+    doc.save('Freedom-Number-Calculator-Results.pdf');
+
+    // Button feedback
+    const btn = document.querySelector('#saveBar .btn-save:first-child');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> PDF Downloaded!';
+    setTimeout(() => { btn.innerHTML = orig; }, 3000);
   };
 
   // --- PERSONALIZED LINK ---
