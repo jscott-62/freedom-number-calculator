@@ -566,16 +566,26 @@
   /* --- PRINT --- */
   @media print {
     body { background: #fff; color: #000; }
-    .hero { background: none; }
-    .nav-tabs, .save-bar, .welcome-back, .btn-outline, .btn-primary, .footer { display: none !important; }
-    .section { display: block !important; page-break-inside: avoid; }
-    .result-panel { display: block !important; }
+    .hero { background: none; padding: 1.5rem 1rem 1rem; }
+    .nav-tabs, .welcome-back, .btn-outline, .btn-primary, .footer, .cta-box, #saveCard { display: none !important; }
+    /* Show all sections that have results */
+    .section { display: block !important; page-break-before: auto; }
+    .result-panel.visible { display: block !important; }
+    /* Hide the "no data" placeholders and input form on print */
+    #gapNoData, #chartNoData { display: none !important; }
+    .card:has(> .card-title:first-child) { page-break-inside: avoid; }
+    .guide-phase { page-break-inside: avoid; }
+    .gap-scenario { page-break-inside: avoid; }
+    .section-header { page-break-after: avoid; }
+    /* Clean styles for paper */
     .card, .guide-phase, .gap-scenario { border-color: #ccc; background: #f9f9f9; }
     .freedom-number-display { background: #f0f0f0; border-color: #ccc; }
     .freedom-number-display .number { color: #000; -webkit-text-fill-color: #000; }
     .stat-box { background: #f5f5f5; border-color: #ccc; }
     .hero h1 { background: none; -webkit-text-fill-color: #000; color: #000; }
     .hero-badge { background: #eee; color: #333; border-color: #ccc; }
+    .guide-phase .phase-tag { border: 1px solid #999; }
+    .gap-bar-track { background: #ddd; }
     * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
