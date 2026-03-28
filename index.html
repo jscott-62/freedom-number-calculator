@@ -703,15 +703,24 @@
       <p id="worksheetNarrative" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7;"></p>
     </div>
 
-    <div class="save-bar" id="saveBar">
-      <button class="btn-save" onclick="printResults()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Print / Save as PDF
-      </button>
-      <button class="btn-save" onclick="copyResultsLink()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-        Copy My Personalized Link
-      </button>
+    <div class="card" id="saveCard" style="display:none; text-align: center; border-color: rgba(245,158,11,0.2); background: linear-gradient(135deg, rgba(245,158,11,0.04), transparent);">
+      <div class="card-title">Save Your Results</div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; margin-bottom: 1.25rem;">
+        This is your number. You'll want to come back to it. Print a copy so you have a permanent record of your Freedom Number, your gap, and all three scenarios. Tape it to your wall, put it in your desk drawer, keep it where you'll see it. This is the number that changes everything.
+      </p>
+      <div class="save-bar visible" id="saveBar">
+        <button class="btn-save" onclick="printResults()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save as PDF
+        </button>
+        <button class="btn-save" onclick="copyResultsLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          Copy My Personalized Link
+        </button>
+      </div>
+      <p style="color: var(--text-dim); font-size: 0.78rem; margin-top: 0.75rem; line-height: 1.5;">
+        Your personalized link saves your exact numbers in the URL itself. Bookmark it or save it somewhere safe. When you open it again, all your inputs will be restored automatically, no account needed.
+      </p>
     </div>
 
     <div style="text-align: center; margin-top: 1rem;">
@@ -1015,7 +1024,7 @@
     FIELD_IDS.forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('welcomeBack').classList.remove('visible');
     document.getElementById('worksheetResults').classList.remove('visible');
-    document.getElementById('saveBar').classList.remove('visible');
+    document.getElementById('saveCard').style.display = 'none';
     document.getElementById('gapNoData').style.display = '';
     document.getElementById('gapResults').style.display = 'none';
     document.getElementById('chartNoData').style.display = '';
@@ -1118,7 +1127,7 @@
 
     document.getElementById('worksheetNarrative').textContent = narrative;
     document.getElementById('worksheetResults').classList.add('visible');
-    document.getElementById('saveBar').classList.add('visible');
+    document.getElementById('saveCard').style.display = 'block';
 
     // Save inputs to localStorage
     saveInputs();
