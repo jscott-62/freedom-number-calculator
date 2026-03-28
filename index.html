@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freedom Number Calculator Kit | Freedom Life 3.0</title>
+<style>
+  :root {
+    --bg-deep: #0a0f1a;
+    --bg-card: #111827;
+    --bg-input: #1e293b;
+    --border: #334155;
+    --border-focus: #f59e0b;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --accent: #f59e0b;
+    --accent-hover: #fbbf24;
+    --accent-glow: rgba(245, 158, 11, 0.15);
+    --green: #22c55e;
+    --green-dim: rgba(34, 197, 94, 0.12);
+    --red: #ef4444;
+    --red-dim: rgba(239, 68, 68, 0.12);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59, 130, 246, 0.12);
+    --purple: #a78bfa;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* --- HEADER --- */
+  .hero {
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+    background: linear-gradient(180deg, rgba(245,158,11,0.06) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-glow);
+    border: 1px solid rgba(245,158,11,0.25);
+    padding: 0.35rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* --- NAV TABS --- */
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 1rem 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-tab:hover { color: var(--text-muted); }
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .nav-tab .tab-num {
+    display: block;
+    font-size: 1.25rem;
+    margin-bottom: 0.15rem;
+  }
+
+  /* --- SECTIONS --- */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem 4rem;
+  }
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    padding: 2rem 0 1rem;
+  }
+  .section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+  .section-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  /* --- CARD --- */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  /* --- FORM ELEMENTS --- */
+  .field {
+    margin-bottom: 1.25rem;
+  }
+  .field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .field .hint {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .field input::placeholder { color: var(--text-dim); }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 500px) { .input-row { grid-template-columns: 1fr; } }
+
+  /* --- BUTTONS --- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    width: 100%;
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(245,158,11,0.3);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+  }
+  .btn-outline:hover {
+    background: var(--accent-glow);
+  }
+
+  /* --- RESULTS --- */
+  .result-panel {
+    display: none;
+    margin-top: 1.5rem;
+  }
+  .result-panel.visible { display: block; }
+
+  .freedom-number-display {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02));
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+  }
+  .freedom-number-display .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .freedom-number-display .number {
+    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+  }
+  .freedom-number-display .subtext {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .stat-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-box .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 0.35rem;
+  }
+  .stat-box .stat-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .stat-box .stat-note {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+  }
+  .stat-box.green .stat-value { color: var(--green); }
+  .stat-box.red .stat-value { color: var(--red); }
+  .stat-box.blue .stat-value { color: var(--blue); }
+  .stat-box.amber .stat-value { color: var(--accent); }
+
+  /* --- GAP BARS --- */
+  .gap-scenario {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .gap-scenario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.75rem;
+  }
+  .gap-scenario-header .rate {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .gap-scenario-header .rate-label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  .gap-scenario-header .outcome {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .gap-bar-track {
+    height: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .gap-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.8s ease;
+  }
+  .gap-bar-fill.red { background: linear-gradient(90deg, var(--red), #f87171); }
+  .gap-bar-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .gap-bar-fill.green { background: linear-gradient(90deg, var(--green), #4ade80); }
+  .gap-detail {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* --- COMPARISON TABLE --- */
+  .comparison-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .comparison-table th, .comparison-table td {
+    padding: 0.75rem 1rem;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison-table th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    background: var(--bg-input);
+    position: sticky;
+    top: 0;
+  }
+  .comparison-table th:first-child, .comparison-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+  }
+  .comparison-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .comparison-table .highlight { color: var(--green); font-weight: 700; }
+  .comparison-table .traditional { color: var(--text-dim); }
+  .comparison-table .diff-row td {
+    border-top: 2px solid var(--border);
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  /* --- GUIDE CONTENT --- */
+  .guide-phase {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    border-left: 3px solid var(--border);
+  }
+  .guide-phase.grief { border-left-color: var(--red); }
+  .guide-phase.anger { border-left-color: var(--accent); }
+  .guide-phase.clarity { border-left-color: var(--green); }
+
+  .guide-phase .phase-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+  .guide-phase.grief .phase-tag { background: var(--red-dim); color: var(--red); }
+  .guide-phase.anger .phase-tag { background: var(--accent-glow); color: var(--accent); }
+  .guide-phase.clarity .phase-tag { background: var(--green-dim); color: var(--green); }
+
+  .guide-phase h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .guide-phase p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin-bottom: 0.75rem;
+  }
+  .guide-phase p:last-child { margin-bottom: 0; }
+  .guide-phase ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+  }
+  .guide-phase li {
+    position: relative;
+    padding-left: 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+  .guide-phase li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+  .guide-phase.grief li::before { background: var(--red); }
+  .guide-phase.anger li::before { background: var(--accent); }
+  .guide-phase.clarity li::before { background: var(--green); }
+
+  .guide-action-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+  }
+  .guide-action-box .action-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .guide-action-box p {
+    font-size: 0.88rem;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+
+  /* --- NEXT STEP CTA --- */
+  .cta-box {
+    background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.03));
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  .cta-box h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .cta-box p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    max-width: 500px;
+    margin: 0 auto 1.25rem;
+  }
+
+  /* --- FOOTER --- */
+  .footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  .footer p {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* --- PRINT --- */
+  @media print {
+    body { background: #fff; color: #000; }
+    .nav-tabs { display: none; }
+    .section { display: block !important; page-break-inside: avoid; }
+    .card, .guide-phase, .gap-scenario { border-color: #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-badge">Freedom Life 3.0</div>
+  <h1>Freedom Number Calculator Kit</h1>
+  <p>Your exact retirement target. Your gap. Your path forward. In about 30 minutes, you'll know exactly where you stand.</p>
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" data-tab="worksheet">
+    <span class="tab-num">1</span>Freedom Number
+  </button>
+  <button class="nav-tab" data-tab="gap">
+    <span class="tab-num">2</span>Gap Calculator
+  </button>
+  <button class="nav-tab" data-tab="guide">
+    <span class="tab-num">3</span>"Oh My God" Guide
+  </button>
+  <button class="nav-tab" data-tab="chart">
+    <span class="tab-num">4</span>Return Comparison
+  </button>
+</nav>
+
+<div class="container">
+
+<!-- ========================================= -->
+<!-- SECTION 1: FREEDOM NUMBER WORKSHEET       -->
+<!-- ========================================= -->
+<div class="section active" id="sec-worksheet">
+
+  <div class="section-header">
+    <h2>Your Freedom Number Worksheet</h2>
+    <p>Not a guess. Not a range. Your number. Based on your age, your savings, your income, and your timeline.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your Information</div>
+
+    <div class="input-row">
+      <div class="field">
+        <label for="currentAge">Current Age</label>
+        <input type="number" id="currentAge" placeholder="55" min="30" max="85" step="1">
+      </div>
+      <div class="field">
+        <label for="retireAge">Target Retirement Age</label>
+        <input type="number" id="retireAge" placeholder="67" min="40" max="90" step="1">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="field">
+        <label for="lifeExpect">Life Expectancy</label>
+        <div class="hint">Plan long. 90 is a good baseline.</div>
+        <input type="number" id="lifeExpect" placeholder="90" min="70" max="110" step="1">
+      </div>
+      <div class="field">
+        <label for="annualIncome">Desired Annual Retirement Income</label>
+        <div class="hint">What you'd need per year to live comfortably.</div>
+        <input type="number" id="annualIncome" placeholder="75000" min="0" step="any">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="field">
+        <label for="currentSavings">Current Retirement Savings</label>
+        <input type="number" id="currentSavings" placeholder="150000" min="0" step="any">
+      </div>
+      <div class="field">
+        <label for="monthlyContrib">Monthly Contribution</label>
+        <div class="hint">What you can add each month going forward.</div>
+        <input type="number" id="monthlyContrib" placeholder="500" min="0" step="any">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="socialSecurity">Expected Annual Social Security</label>
+      <div class="hint">Check ssa.gov/myaccount for your estimate. Enter 0 if unsure.</div>
+      <input type="number" id="socialSecurity" placeholder="24000" min="0" step="any">
+    </div>
+
+    <button class="btn btn-primary" onclick="calculateFreedomNumber()">Calculate My Freedom Number</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="result-panel" id="worksheetResults">
+
+    <div class="freedom-number-display">
+      <div class="label">Your Freedom Number</div>
+      <div class="number" id="freedomNumber">$0</div>
+      <div class="subtext" id="freedomSubtext"></div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box amber">
+        <div class="stat-label">Years to Retirement</div>
+        <div class="stat-value" id="statYears">--</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="stat-label">Years in Retirement</div>
+        <div class="stat-value" id="statRetYears">--</div>
+      </div>
+      <div class="stat-box green">
+        <div class="stat-label">Annual Income Needed (After SS)</div>
+        <div class="stat-value" id="statIncomeGap">--</div>
+      </div>
+      <div class="stat-box red">
+        <div class="stat-label">Your Current Gap</div>
+        <div class="stat-value" id="statGap">--</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What This Means</div>
+      <p id="worksheetNarrative" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7;"></p>
+    </div>
+
+    <div style="text-align: center; margin-top: 1rem;">
+      <button class="btn btn-outline" onclick="goToTab('gap')">Next: See How to Close the Gap &rarr;</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========================================= -->
+<!-- SECTION 2: GAP CALCULATOR                 -->
+<!-- ========================================= -->
+<div class="section" id="sec-gap">
+
+  <div class="section-header">
+    <h2>The Gap Calculator</h2>
+    <p>How far you are from your Freedom Number, and what rate of return closes the gap. Three scenarios. One reality check.</p>
+  </div>
+
+  <div id="gapNoData" class="card" style="text-align:center; padding: 3rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">Complete the Freedom Number Worksheet first to see your gap analysis.</p>
+    <button class="btn btn-outline" onclick="goToTab('worksheet')">&larr; Go to Worksheet</button>
+  </div>
+
+  <div id="gapResults" style="display:none;">
+
+    <div class="freedom-number-display" style="margin-bottom: 1.5rem;">
+      <div class="label">Your Gap</div>
+      <div class="number" id="gapTotal">$0</div>
+      <div class="subtext" id="gapSubtext"></div>
+    </div>
+
+    <div id="gapScenarios"></div>
+
+    <div class="card" style="margin-top: 1.25rem;">
+      <div class="card-title">The Math is Clear</div>
+      <p id="gapNarrative" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7;"></p>
+    </div>
+
+    <div style="text-align: center; margin-top: 1rem;">
+      <button class="btn btn-outline" onclick="goToTab('guide')">Next: What to Do With This Information &rarr;</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ========================================= -->
+<!-- SECTION 3: "OH MY GOD" MOMENT GUIDE       -->
+<!-- ========================================= -->
+<div class="section" id="sec-guide">
+
+  <div class="section-header">
+    <h2>The "Oh My God" Moment Guide</h2>
+    <p>You just saw your number. Here's what happens next, and what to do about it.</p>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--accent); margin-bottom: 2rem;">
+    <p style="color: var(--text); font-size: 1rem; font-style: italic; line-height: 1.7;">
+      Everyone who runs these numbers for the first time goes through the same three phases. Grief. Anger. Then clarity. Each phase has a job to do. Don't skip any of them, and don't get stuck in the first two.
+    </p>
+  </div>
+
+  <!-- PHASE 1: GRIEF -->
+  <div class="guide-phase grief">
+    <div class="phase-tag">Phase 1</div>
+    <h3>Grief: "I'm so far behind."</h3>
+    <p>This is the gut punch. You look at the gap between where you are and where you need to be, and it feels impossible. Your stomach drops. You might feel sick. That's normal.</p>
+    <p>What you're grieving is the years you thought were working for you, but weren't. The 401(k) contributions that barely kept pace with inflation. The advisor fees that quietly ate your returns. The decades of "stay the course" advice that left you here.</p>
+    <ul>
+      <li>Let yourself feel it. Don't rationalize it away.</li>
+      <li>Write down what you're feeling. One page, uncensored.</li>
+      <li>Remind yourself: the number is the number. It's not a judgment on you.</li>
+      <li>This feeling is temporary. It's not your permanent address.</li>
+    </ul>
+    <div class="guide-action-box">
+      <div class="action-label">Your Move</div>
+      <p>Set a timer for 15 minutes. Let yourself feel all of it. When the timer goes off, turn the page. Literally. Move on to Phase 2.</p>
+    </div>
+  </div>
+
+  <!-- PHASE 2: ANGER -->
+  <div class="guide-phase anger">
+    <div class="phase-tag">Phase 2</div>
+    <h3>Anger: "Why didn't anyone tell me this?"</h3>
+    <p>Once the grief fades, the anger shows up. And it has questions.</p>
+    <p>Why didn't your financial advisor run these numbers for you ten years ago? Why did every retirement article just say "max out your 401(k)" like that was an answer? Why is the entire financial industry built around keeping you calm instead of keeping you informed?</p>
+    <ul>
+      <li>The anger is valid. Channel it. Don't let it freeze you.</li>
+      <li>You were given a playbook by people who profit whether you win or lose.</li>
+      <li>The same system that created the gap won't close the gap.</li>
+      <li>Being angry at the past doesn't change the past. Acting on the future does.</li>
+    </ul>
+    <div class="guide-action-box">
+      <div class="action-label">Your Move</div>
+      <p>Write down one sentence: "The old plan got me to $[your current savings]. I need a new plan to get me to $[your Freedom Number]." Tape it where you'll see it every day. This is your line in the sand.</p>
+    </div>
+  </div>
+
+  <!-- PHASE 3: CLARITY -->
+  <div class="guide-phase clarity">
+    <div class="phase-tag">Phase 3</div>
+    <h3>Clarity: "So what actually works?"</h3>
+    <p>This is where it gets good. Because once you know the number, and once you've processed the emotion, you can finally think clearly about the math.</p>
+    <p>And the math says something very specific: the only variable that changes your outcome dramatically is rate of return. Not cutting your morning coffee. Not working five more years. The return on your money is the lever that moves everything.</p>
+    <ul>
+      <li>Go back to your Gap Calculator results. Look at the three scenarios.</li>
+      <li>At 7%, you're probably stuck. That's the path you've been on.</li>
+      <li>At 15 to 20%, the gap starts closing in a way that feels possible.</li>
+      <li>The question isn't "can I save more?" The question is "can I earn more on what I have?"</li>
+    </ul>
+    <div class="guide-action-box">
+      <div class="action-label">Your Move</div>
+      <p>Open the Rate of Return Comparison Chart (Tab 4). Look at your current savings projected at different rates. That chart is your map. The difference between 7% and 20% over 10 years isn't incremental. It's life-changing.</p>
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <h3>You've Done the Hard Part</h3>
+    <p>Most people never run the numbers. You just did. Most people stay stuck in grief or anger. You moved through to clarity. That puts you ahead of 90% of people your age.</p>
+    <button class="btn btn-outline" onclick="goToTab('chart')">See the Rate of Return Comparison &rarr;</button>
+  </div>
+
+</div>
+
+<!-- ========================================= -->
+<!-- SECTION 4: RATE OF RETURN COMPARISON      -->
+<!-- ========================================= -->
+<div class="section" id="sec-chart">
+
+  <div class="section-header">
+    <h2>Rate of Return Comparison Chart</h2>
+    <p>What your current savings become at different return rates over 5, 10, and 15 years. The difference between "safe" and "strategic" will change how you think about everything.</p>
+  </div>
+
+  <div id="chartNoData" class="card" style="text-align:center; padding: 3rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">Complete the Freedom Number Worksheet first to see your personalized comparison chart.</p>
+    <button class="btn btn-outline" onclick="goToTab('worksheet')">&larr; Go to Worksheet</button>
+  </div>
+
+  <div id="chartResults" style="display:none;">
+
+    <div class="card">
+      <div class="card-title">Growth of Your Current Savings: <span id="chartSavingsLabel" style="color: var(--accent);"></span></div>
+      <p style="color: var(--text-dim); font-size: 0.82rem; margin-bottom: 1rem;">Includes your monthly contribution of <span id="chartContribLabel" style="color:var(--text);"></span>/mo. No additional deposits beyond that.</p>
+      <div class="comparison-table-wrap">
+        <table class="comparison-table" id="comparisonTable">
+          <thead>
+            <tr>
+              <th>Return Rate</th>
+              <th>5 Years</th>
+              <th>10 Years</th>
+              <th>15 Years</th>
+              <th>Category</th>
+            </tr>
+          </thead>
+          <tbody id="compTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">The Difference Between 7% and 20% Over Time</div>
+      <div id="diffStats" class="stat-grid"></div>
+      <p id="chartNarrative" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; margin-top: 1rem;"></p>
+    </div>
+
+    <div class="cta-box">
+      <h3>Now You Know Your Number. Now You See the Path.</h3>
+      <p>The traditional plan gets you a traditional outcome. If that's not enough (and for most people reading this, it isn't), it's time to learn what a different rate of return actually looks like in practice.</p>
+    </div>
+
+  </div>
+
+</div>
+
+</div><!-- /.container -->
+
+<div class="footer">
+  <p>&copy; 2026 Freedom Life 3.0. For educational purposes only. Not financial advice.<br>
+  <a href="https://freedomlife3.com" target="_blank">freedomlife3.com</a></p>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+(function() {
+  'use strict';
+
+  // --- TAB NAVIGATION ---
+  const tabs = document.querySelectorAll('.nav-tab');
+  const sections = document.querySelectorAll('.section');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      sections.forEach(s => s.classList.remove('active'));
+      document.getElementById('sec-' + target).classList.add('active');
+      document.querySelector('.container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  window.goToTab = function(name) {
+    const tab = document.querySelector(`.nav-tab[data-tab="${name}"]`);
+    if (tab) tab.click();
+  };
+
+  // --- FORMATTING ---
+  function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  // --- FUTURE VALUE with monthly contributions ---
+  function futureValue(principal, monthlyAdd, annualRate, years) {
+    if (years <= 0) return principal;
+    const r = annualRate / 12;
+    const n = years * 12;
+    if (r === 0) return principal + monthlyAdd * n;
+    const compounded = principal * Math.pow(1 + r, n);
+    const annuity = monthlyAdd * ((Math.pow(1 + r, n) - 1) / r);
+    return compounded + annuity;
+  }
+
+  // --- REQUIRED RATE to reach target ---
+  function requiredRate(principal, monthlyAdd, target, years) {
+    // Newton's method
+    let rate = 0.10;
+    for (let i = 0; i < 200; i++) {
+      const fv = futureValue(principal, monthlyAdd, rate, years);
+      const diff = fv - target;
+      if (Math.abs(diff) < 1) return rate;
+      // numerical derivative
+      const fv2 = futureValue(principal, monthlyAdd, rate + 0.0001, years);
+      const deriv = (fv2 - fv) / 0.0001;
+      if (Math.abs(deriv) < 1e-10) break;
+      rate = rate - diff / deriv;
+      if (rate < -0.5) rate = -0.5;
+      if (rate > 5) rate = 5;
+    }
+    return rate;
+  }
+
+  // --- STORED CALCULATION DATA ---
+  let calcData = null;
+
+  // --- MAIN CALCULATION ---
+  window.calculateFreedomNumber = function() {
+    const age = parseInt(document.getElementById('currentAge').value);
+    const retAge = parseInt(document.getElementById('retireAge').value);
+    const lifeExp = parseInt(document.getElementById('lifeExpect').value);
+    const income = parseFloat(document.getElementById('annualIncome').value);
+    const savings = parseFloat(document.getElementById('currentSavings').value);
+    const monthly = parseFloat(document.getElementById('monthlyContrib').value) || 0;
+    const ss = parseFloat(document.getElementById('socialSecurity').value) || 0;
+
+    if (!age || !retAge || !lifeExp || !income || isNaN(savings)) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+    if (retAge <= age) {
+      alert('Target retirement age must be greater than your current age.');
+      return;
+    }
+    if (lifeExp <= retAge) {
+      alert('Life expectancy must be greater than retirement age.');
+      return;
+    }
+
+    const yearsToRetire = retAge - age;
+    const yearsInRetire = lifeExp - retAge;
+    const annualGap = Math.max(0, income - ss);
+
+    // Freedom Number: total needed in retirement (simplified: annual gap * years in retirement)
+    // Using 3% inflation-adjusted withdrawal (more conservative than 4% rule)
+    // Actually let's use a present value of annuity approach assuming 4% withdrawal rate
+    const withdrawalRate = 0.04;
+    const freedomNum = annualGap / withdrawalRate;
+
+    // Current trajectory at 7%
+    const projectedAt7 = futureValue(savings, monthly, 0.07, yearsToRetire);
+    const gap = Math.max(0, freedomNum - projectedAt7);
+
+    // Required rate
+    const reqRate = requiredRate(savings, monthly, freedomNum, yearsToRetire);
+
+    calcData = {
+      age, retAge, lifeExp, income, savings, monthly, ss,
+      yearsToRetire, yearsInRetire, annualGap,
+      freedomNum, projectedAt7, gap, reqRate
+    };
+
+    // --- DISPLAY WORKSHEET RESULTS ---
+    document.getElementById('freedomNumber').textContent = fmt(freedomNum);
+    document.getElementById('freedomSubtext').textContent =
+      `The total nest egg needed to generate ${fmt(annualGap)}/year for ${yearsInRetire} years of retirement.`;
+
+    document.getElementById('statYears').textContent = yearsToRetire;
+    document.getElementById('statRetYears').textContent = yearsInRetire;
+    document.getElementById('statIncomeGap').textContent = fmt(annualGap);
+    document.getElementById('statGap').textContent = fmt(gap);
+
+    const narrative = `You're ${age} years old. You want to retire at ${retAge}, which gives you ${yearsToRetire} years to build your nest egg. ` +
+      `With Social Security covering ${fmt(ss)}/year, you need your investments to generate ${fmt(annualGap)}/year. ` +
+      `Using a 4% withdrawal rate, that means you need ${fmt(freedomNum)} saved by retirement. ` +
+      `Right now you have ${fmt(savings)}. At a traditional 7% return with ${fmt(monthly)}/month contributions, ` +
+      `you'll have roughly ${fmt(projectedAt7)} by age ${retAge}. ` +
+      (gap > 0
+        ? `That leaves a gap of ${fmt(gap)}. The old plan doesn't get you there. But a different rate of return might.`
+        : `You're actually on track. But the comparison chart will show you how much faster you could get there.`);
+
+    document.getElementById('worksheetNarrative').textContent = narrative;
+    document.getElementById('worksheetResults').classList.add('visible');
+
+    // Scroll to results
+    setTimeout(function() {
+      document.getElementById('worksheetResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+
+    // --- BUILD GAP SECTION ---
+    buildGapSection();
+    buildChartSection();
+  };
+
+  // --- GAP CALCULATOR ---
+  function buildGapSection() {
+    if (!calcData) return;
+    const d = calcData;
+
+    document.getElementById('gapNoData').style.display = 'none';
+    document.getElementById('gapResults').style.display = 'block';
+
+    document.getElementById('gapTotal').textContent = fmt(d.gap);
+    document.getElementById('gapSubtext').textContent =
+      `Between where you are and ${fmt(d.freedomNum)} by age ${d.retAge}`;
+
+    const scenarios = [
+      { rate: 0.07, label: 'Traditional (Index Funds, Bonds)', color: 'red' },
+      { rate: 0.15, label: 'Moderate Alternative Strategy', color: 'amber' },
+      { rate: 0.20, label: 'Aggressive Alternative Strategy', color: 'green' }
+    ];
+
+    const container = document.getElementById('gapScenarios');
+    container.innerHTML = '';
+
+    scenarios.forEach(s => {
+      const projected = futureValue(d.savings, d.monthly, s.rate, d.yearsToRetire);
+      const pct = Math.min(100, (projected / d.freedomNum) * 100);
+      const shortfall = d.freedomNum - projected;
+      const hits = projected >= d.freedomNum;
+
+      const div = document.createElement('div');
+      div.className = 'gap-scenario';
+      div.innerHTML = `
+        <div class="gap-scenario-header">
+          <div>
+            <span class="rate">${(s.rate * 100).toFixed(0)}% Annual Return</span>
+            <span class="rate-label"> &middot; ${s.label}</span>
+          </div>
+          <div class="outcome" style="color: var(--${hits ? 'green' : s.color === 'amber' ? 'accent' : 'red'})">
+            ${hits ? '&#10003; Goal Reached' : fmt(Math.abs(shortfall)) + ' short'}
+          </div>
+        </div>
+        <div class="gap-bar-track">
+          <div class="gap-bar-fill ${s.color}" style="width: ${pct}%"></div>
+        </div>
+        <div class="gap-detail">
+          Projected portfolio at age ${d.retAge}: <strong>${fmt(projected)}</strong>
+          &middot; ${pct.toFixed(0)}% of Freedom Number
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    const gapNarr = `At 7%, your current savings plus ${fmt(d.monthly)}/month in contributions grows to roughly ${fmt(futureValue(d.savings, d.monthly, 0.07, d.yearsToRetire))} in ${d.yearsToRetire} years. ` +
+      `At 15%, that same money becomes ${fmt(futureValue(d.savings, d.monthly, 0.15, d.yearsToRetire))}. ` +
+      `At 20%, it reaches ${fmt(futureValue(d.savings, d.monthly, 0.20, d.yearsToRetire))}. ` +
+      `Same starting point. Same contributions. Completely different outcomes. ` +
+      `The variable that matters most isn't how much you save. It's the rate of return on what you already have.`;
+
+    document.getElementById('gapNarrative').textContent = gapNarr;
+  }
+
+  // --- COMPARISON CHART ---
+  function buildChartSection() {
+    if (!calcData) return;
+    const d = calcData;
+
+    document.getElementById('chartNoData').style.display = 'none';
+    document.getElementById('chartResults').style.display = 'block';
+
+    document.getElementById('chartSavingsLabel').textContent = fmt(d.savings);
+    document.getElementById('chartContribLabel').textContent = fmt(d.monthly);
+
+    const rates = [
+      { rate: 0.03, label: '3%', cat: 'Savings Account', cls: 'traditional' },
+      { rate: 0.05, label: '5%', cat: 'CDs / Treasury', cls: 'traditional' },
+      { rate: 0.07, label: '7%', cat: 'Index Funds (Avg)', cls: 'traditional' },
+      { rate: 0.10, label: '10%', cat: 'Active Management', cls: '' },
+      { rate: 0.15, label: '15%', cat: 'Alternative Strategies', cls: 'highlight' },
+      { rate: 0.20, label: '20%', cat: 'High-Performance', cls: 'highlight' },
+    ];
+
+    const tbody = document.getElementById('compTableBody');
+    tbody.innerHTML = '';
+
+    rates.forEach(r => {
+      const v5 = futureValue(d.savings, d.monthly, r.rate, 5);
+      const v10 = futureValue(d.savings, d.monthly, r.rate, 10);
+      const v15 = futureValue(d.savings, d.monthly, r.rate, 15);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="${r.cls}">${r.label}</td>
+        <td class="${r.cls}">${fmt(v5)}</td>
+        <td class="${r.cls}">${fmt(v10)}</td>
+        <td class="${r.cls}">${fmt(v15)}</td>
+        <td style="font-size:0.78rem; color:var(--text-dim)">${r.cat}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Difference row
+    const at7_10 = futureValue(d.savings, d.monthly, 0.07, 10);
+    const at20_10 = futureValue(d.savings, d.monthly, 0.20, 10);
+    const at7_5 = futureValue(d.savings, d.monthly, 0.07, 5);
+    const at20_5 = futureValue(d.savings, d.monthly, 0.20, 5);
+    const at7_15 = futureValue(d.savings, d.monthly, 0.07, 15);
+    const at20_15 = futureValue(d.savings, d.monthly, 0.20, 15);
+
+    const diffTr = document.createElement('tr');
+    diffTr.className = 'diff-row';
+    diffTr.innerHTML = `
+      <td>Difference (20% vs 7%)</td>
+      <td>+${fmt(at20_5 - at7_5)}</td>
+      <td>+${fmt(at20_10 - at7_10)}</td>
+      <td>+${fmt(at20_15 - at7_15)}</td>
+      <td></td>
+    `;
+    tbody.appendChild(diffTr);
+
+    // Diff stats
+    const diffStats = document.getElementById('diffStats');
+    diffStats.innerHTML = `
+      <div class="stat-box amber">
+        <div class="stat-label">5-Year Difference</div>
+        <div class="stat-value">+${fmt(at20_5 - at7_5)}</div>
+        <div class="stat-note">${((at20_5 / at7_5 - 1) * 100).toFixed(0)}% more wealth</div>
+      </div>
+      <div class="stat-box amber">
+        <div class="stat-label">10-Year Difference</div>
+        <div class="stat-value">+${fmt(at20_10 - at7_10)}</div>
+        <div class="stat-note">${((at20_10 / at7_10 - 1) * 100).toFixed(0)}% more wealth</div>
+      </div>
+      <div class="stat-box amber">
+        <div class="stat-label">15-Year Difference</div>
+        <div class="stat-value">+${fmt(at20_15 - at7_15)}</div>
+        <div class="stat-note">${((at20_15 / at7_15 - 1) * 100).toFixed(0)}% more wealth</div>
+      </div>
+    `;
+
+    const chartNarr = `Starting with ${fmt(d.savings)} and adding ${fmt(d.monthly)}/month, the difference between a traditional 7% return and a 20% return over 10 years is ${fmt(at20_10 - at7_10)}. ` +
+      `That's not a rounding error. That's the difference between "comfortable" and "stuck." ` +
+      `Over 15 years, that gap widens to ${fmt(at20_15 - at7_15)}. ` +
+      `The rate of return isn't a detail. It's the entire game.`;
+
+    document.getElementById('chartNarrative').textContent = chartNarr;
+  }
+
+  // --- ENTER KEY SUPPORT ---
+  document.querySelectorAll('#sec-worksheet input').forEach(input => {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') calculateFreedomNumber();
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
